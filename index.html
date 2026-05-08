@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>雇用契約書提出フォーム</title>
+    <style>
+        canvas { border: 1px solid #000; cursor: crosshair; }
+        .container { max-width: 500px; margin: 20px auto; font-family: sans-serif; }
+        input, button { width: 100%; margin-bottom: 15px; padding: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>雇用契約提出フォーム</h2>
+    <input type="text" id="name" placeholder="氏名" required>
+    <input type="text" id="address" placeholder="住所" required>
+    
+    <p>署名（枠内に記入してください）</p>
+    <canvas id="sig-canvas" width="450" height="150"></canvas>
+    
+    <button id="submit-btn">契約書を送信する</button>
+</div>
+
+<script>
+    const canvas = document.getElementById('sig-canvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    // マウス・タッチ操作のリスナー（署名機能）
+    canvas.addEventListener('mousedown', () => drawing = true);
+    canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousemove', draw);
+
+    function draw(e) {
+        if (!drawing) return;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    }
+
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+        const data = {
+            name: document.getElementById('name').value,
+            address: document.getElementById('address').value,
+            signature: canvas.toDataURL() // 署名を画像データに変換
+        };
+
+        const gasUrl = 'ここにデプロイしたURLを貼り付け';
+
+        const response = await fetch(gasUrl, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) alert('提出完了しました！');
+    });
+</script>
+</body>
+</html>
